@@ -1,0 +1,35 @@
+server:
+  port: 8012
+
+spring:
+  application:
+    name: agentos-channel-gateway
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.agentos.channelgateway: DEBUG
+
+agentos:
+  services:
+    conversation-url: ${CONVERSATION_URL:http://localhost:8011}
+    user-system-url: ${USER_SYSTEM_URL:http://localhost:8006}
