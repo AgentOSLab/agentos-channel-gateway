@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,9 @@ public class ChannelWebhookController {
     private final ChannelIngressService ingressService;
     private final SlackSignatureVerifier slackSignatureVerifier;
     private final ObjectMapper objectMapper;
+
+    @Value("${agentos.channel-gateway.webhooks.require-verification:false}")
+    private boolean requireWebhookVerification;
 
     @PostMapping(value = "/slack/events", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<JsonNode>> slackEvents(
@@ -69,6 +73,9 @@ public class ChannelWebhookController {
      */
     @PostMapping(value = "/whatsapp/webhook", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> whatsappWebhook(@RequestBody String rawBody) {
+        if (requireWebhookVerification) {
+            return Mono.just(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build());
+        }
         log.debug("WhatsApp webhook received ({} bytes)", rawBody != null ? rawBody.length() : 0);
         // TODO: verify Meta X-Hub-Signature-256 when WHATSAPP_APP_SECRET is configured
         InboundMessage msg = new InboundMessage("whatsapp", UUID.randomUUID().toString(), null, null, null);
@@ -81,6 +88,9 @@ public class ChannelWebhookController {
      */
     @PostMapping(value = "/teams/messages", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> teamsMessages(@RequestBody String rawBody) {
+        if (requireWebhookVerification) {
+            return Mono.just(ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).build());
+        }
         log.debug("Teams webhook received ({} bytes)", rawBody != null ? rawBody.length() : 0);
         // TODO: validate JWT from Bot Framework when configured
         InboundMessage msg = new InboundMessage("teams", UUID.randomUUID().toString(), null, null, null);

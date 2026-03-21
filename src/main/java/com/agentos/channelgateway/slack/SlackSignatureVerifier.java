@@ -25,10 +25,13 @@ public class SlackSignatureVerifier {
 
     private final AtomicBoolean unverifiedWarningLogged = new AtomicBoolean(false);
     private final String signingSecret;
+    private final boolean requireVerification;
 
     public SlackSignatureVerifier(
-            @Value("${agentos.channel-gateway.slack.signing-secret:}") String signingSecret) {
+            @Value("${agentos.channel-gateway.slack.signing-secret:}") String signingSecret,
+            @Value("${agentos.channel-gateway.webhooks.require-verification:false}") boolean requireVerification) {
         this.signingSecret = signingSecret;
+        this.requireVerification = requireVerification;
     }
 
     /**
@@ -40,6 +43,10 @@ public class SlackSignatureVerifier {
 
     public boolean verify(String timestampHeader, String rawBody, String signatureHeader) {
         if (!isVerificationConfigured()) {
+            if (requireVerification) {
+                log.warn("Slack signing secret missing while webhooks.require-verification=true — rejecting");
+                return false;
+            }
             if (unverifiedWarningLogged.compareAndSet(false, true)) {
                 log.warn("Slack signing secret not configured — request signatures are NOT verified (dev only)");
             }

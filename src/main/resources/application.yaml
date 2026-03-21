@@ -44,5 +44,8 @@ agentos:
     user-system-url: ${USER_SYSTEM_URL:http://localhost:8006}
 
   channel-gateway:
+    webhooks:
+      # When true: Slack requires SLACK_SIGNING_SECRET; WhatsApp/Teams return 501 until signature/JWT checks exist.
+      require-verification: ${CHANNEL_WEBHOOK_REQUIRE_VERIFICATION:false}
     slack:
       signing-secret: ${SLACK_SIGNING_SECRET:}
