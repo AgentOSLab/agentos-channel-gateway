@@ -35,6 +35,14 @@ logging:
     com.agentos.channelgateway: DEBUG
 
 agentos:
+  service-auth:
+    identity: channel-gateway
+    shared-secret: ${SERVICE_AUTH_SECRET:changeme-dev-secret-32-chars-min!!}
+
   services:
     conversation-url: ${CONVERSATION_URL:http://localhost:8011}
     user-system-url: ${USER_SYSTEM_URL:http://localhost:8006}
+
+  channel-gateway:
+    slack:
+      signing-secret: ${SLACK_SIGNING_SECRET:}
